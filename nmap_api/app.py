@@ -5,12 +5,15 @@ from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo
 from socket import getaddrinfo, gethostname, gaierror
 import logging
+import re
 
-# https://xael.org/pages/python-nmap-en.html
-# https://nmap.org/book/man-port-specification.html
-# https://www.mongodb.com/docs/mongodb-shell/crud/read/
-# https://levelup.gitconnected.com/deploy-your-first-flask-mongodb-app-on-kubernetes-8f5a33fa43b4
-# https://earthly.dev/blog/mongodb-docker/
+'''
+Author: David Rouleau
+Last Updated: March 20th, 2023
+
+Description: The purpose of this API is to enable the ability to scan, process, and store
+the output of an NMAP scan against a host(s) (hostname or IP address.)
+'''
 
 logging.basicConfig(filename='app.log', level=logging.DEBUG)
 
@@ -26,6 +29,14 @@ def check_host(host):
         return True
     except gaierror:
         return False
+    
+def is_ip(host):
+    ''' Checks to see if the provided host is an IP address or not using regex'''
+    if re.match("^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$", host):
+        item = "ip"
+    else:
+        item = "host"
+    return item
 
 @app.route("/")
 def index():
@@ -41,9 +52,10 @@ def nmap_scan():
     
     host = request.form['host']
 
-    if not check_host(host):
-        logging.error("Invalid host or IP addess: {}".format(host))
-        return jsonify({'error': 'Invalid host or IP address'}), 400
+    for item in host.split():
+        if not check_host(item):
+            logging.error("Invalid host or IP addess: {}".format(item))
+            return jsonify({'error': 'Invalid host or IP address'}), 400
 
     nm = PortScanner()
     data = nm.scan(host, arguments='-T4')
@@ -83,7 +95,7 @@ def nmap_scan():
     return aggr_response
 
 @app.route('/get_scans', methods=['GET'])
-def get_scan():
+def get_scans():
     ''' Makes a call to the MongoDB database to retrieve scans for a single host '''
     # curl http://localhost:5000/get_scans?host=<host_or_ip_address>
     host = request.args.get('host')
@@ -91,7 +103,17 @@ def get_scan():
         logging.error("Invalid host or IP addess: {}".format(host))
         return jsonify({"error": "Invalid host or IP address."}), 400
     
-    scan_results = db.nmap_scan_results.find_one({"host": host}, sort=[('timestamp', -1)], projection={'_id': False})
+    try:
+        scans = request.args.get('scans')
+        if not scans:
+            scans = 5
+        scans = int(scans)
+    except ValueError as e:
+        logging.error("Scans argument must be an integer")
+        return jsonify({"error": "Scans argument must be an integer."}), 400
+    
+    #scan_results = db.nmap_scan_results.find_one({"{}".format(item): host}, sort=[('timestamp', -1)], projection={'_id': False})
+    scan_results = list(db.nmap_scan_results.find({"{}".format(is_ip(host)): host}, {"_id": 0}).sort("timestamp", -1).limit(scans))
     if not scan_results:
         logging.error("No scans found for host: {}".format(host))
         return jsonify({"error": "No scans found for host: {}".format(host)}), 404
@@ -109,8 +131,13 @@ def get_scan_changes():
     if not check_host(host):
         logging.error("Invalid host or IP addess: {}".format(host))
         return jsonify(error="Invalid hostname or IP address"), 400
+    
+    if re.match("^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$", host):
+        item = "ip"
+    else:
+        item = "host"
 
-    scans = list(db.nmap_scan_results.find({"host": host}, {"_id": 0}).sort("timestamp", -1).limit(2))
+    scans = list(db.nmap_scan_results.find({"{}".format(is_ip(host)): host}, {"_id": 0}).sort("timestamp", -1).limit(2))
     if len(scans) < 2:
         return jsonify(error="Not enough scans for host"), 404
 
