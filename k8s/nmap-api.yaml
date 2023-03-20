@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nmap-api
+  labels:
+    app: nmap-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nmap-api
+  template:
+    metadata:
+      labels:
+        app: nmap-api
+    spec:
+      containers:
+        - name: nmap-api
+          image: drouleaufsa/nmap_api-python:1.0.0
+          ports:
+            - containerPort: 5000
+          imagePullPolicy: Always

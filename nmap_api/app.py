@@ -77,27 +77,23 @@ def nmap_scan():
         
         try:
             dbcall = db.nmap_scan_results.insert_one(host_response)
-            logging.info("Scan results inserted into MongoDB dev db with object ID: {}".format(dbcall.inserted_id))
+            logging.info("Scan results inserted into MongoDB nmap db with object ID: {}".format(dbcall.inserted_id))
         except Exception as e:
-            logging.error("Error inserting scan results into MongoDB dev: {}".format(e))
+            logging.error("Error inserting scan results into MongoDB nmap db: {}".format(e))
         
         # It is necessary to del the ['_id'] key in the response as this key/value pair gets
         # appended as a result of the MongoDB call
-        # {'host': 'scanme.nmap.org', 'ip': '45.33.32.156', 'status': 'up', 'protocol': 'tcp', 'ports': 
-        # [{'22': 'open'}, {'25': 'filtered'}, {'80': 'open'}, {'135': 'filtered'}, {'139': 'filtered'}, 
-        # {'445': 'filtered'}, {'9929': 'open'}, {'31337': 'open'}], '_id': ObjectId('641858b025e0632bfbdd5618')}
+        # e.g. {'host': 'scanme.nmap.org', ... '_id': ObjectId('641858b025e0632bfbdd5618')}
         del host_response['_id']
         
     aggr_response['scanstats'] = data['nmap']['scanstats']
     logging.debug("Scan results: {}".format(aggr_response))
 
-    #return jsonify(aggr_response)
-    return aggr_response
+    return jsonify(aggr_response), 200
 
 @app.route('/get_scans', methods=['GET'])
 def get_scans():
     ''' Makes a call to the MongoDB database to retrieve scans for a single host '''
-    # curl http://localhost:5000/get_scans?host=<host_or_ip_address>
     host = request.args.get('host')
     if not check_host(host):
         logging.error("Invalid host or IP addess: {}".format(host))
@@ -112,7 +108,6 @@ def get_scans():
         logging.error("Scans argument must be an integer")
         return jsonify({"error": "Scans argument must be an integer."}), 400
     
-    #scan_results = db.nmap_scan_results.find_one({"{}".format(item): host}, sort=[('timestamp', -1)], projection={'_id': False})
     scan_results = list(db.nmap_scan_results.find({"{}".format(is_ip(host)): host}, {"_id": 0}).sort("timestamp", -1).limit(scans))
     if not scan_results:
         logging.error("No scans found for host: {}".format(host))
@@ -121,7 +116,7 @@ def get_scans():
     # Add logging output
     logging.info('Retrieved scan results for host: {}'.format(host))
 
-    return jsonify(scan_results)
+    return jsonify(scan_results), 200
 
 @app.route('/get_changes', methods=['GET'])
 def get_scan_changes():
@@ -158,7 +153,7 @@ def get_scan_changes():
         "changed_ports": changed_ports,
     }
 
-    return jsonify(result)
+    return jsonify(result), 200
     
 
 if __name__ == '__main__':
