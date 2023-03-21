@@ -2,7 +2,7 @@
 NMAP Rest API service
 
 ## Description:
-This NMAP Rest API is a stateless service intended to provide basic functionailty around the NMAP (Network Map) utility commonly used for network discovery and security audtiting. This service has 3 main functions or calls:
+This NMAP Rest API is a stateless service intended to provide basic functionailty around the NMAP (Network Map) utility commonly used for network discovery and security auditing. This service has 3 main functions or calls:
 - /scan, HTTP Method = POST
 - /get_scans, HTTP Method = GET
 - /get_changes, HTTP Method = GET
@@ -63,7 +63,7 @@ The Kubernetes cluster components consists of:
 There are many factors at play when operating at large scale and building a service that can handle that scale, most often it revolves around aspects of horizontal scaling, fault tolerance / auto-healing, distributed architecture, database scaling (sharding or clustering), caching, etc.
 
 Some aspects to make this nmap api service more capable of serving 1M requests per second:
-- Load balancing: To handle such a massive load of requests, the service would need to employ a load balancer that distributes the incoming requests across multiple instances of the NMAP Rest API service running in parallel. This can be done using Kubernetes Horizontal Pod Autoscaling (HPA), which automatically scales the number of pods based on CPU utilization or other metrics.
+- Load balancing: To handle such a massive load of requests, the service would need to employ a load balancer that distributes the incoming requests across multiple instances of the NMAP Rest API service running in parallel. While the current architecture does this, it can be enhanced using Kubernetes Horizontal Pod Autoscaling (HPA), which automatically scales the number of pods based on CPU utilization or other metrics.
 - Caching: To reduce the response time of the API service, caching can be implemented at various levels such as client-side, CDN, and server-side caching. This reduces the time taken to generate a response and reduces the load on the backend MongoDB database. Using a distributed caching solution, such as Redis or Memcached, would enable you to cache responses across multiple servers and scale horizontally as needed.
 - Database optimization: As the MongoDB database is used as the backend datastore, it needs to be optimized to handle a massive load of requests. One way to optimize it is by employing sharding, which partitions the data across multiple servers. This enables the database to handle more requests in parallel. Another aspect to think about is creating indexes on frequently accessed fields, ensuring that the database is appropriately tuned for the workload it will be handling.
 - Asynchronous processing: To improve the performance of the API service, it's better to perform scans asynchronously using tools like Celery, Kafka, or RabbitMQ. This would allow multiple scans to run concurrently without blocking other requests.
@@ -88,17 +88,16 @@ Recommended: Kubernetes deployment
 4. Validate some other resources, `kubectl get deployments` - you should see two deployments,  `kubectl get svc` - you should see mongo and nmap-api-svc, `kubectl get pv` - you should see the mongo-pv persistant volume list as bound
 5. The output of `kubectl get svc`, should have localhost under the External-IP column
 
-Optional: If you would like to build the image locally
+Optional: If you would like to build the image locally for local testing
 1. Navigate to the nmap_api directory
 2. Run `docker build -t nmap_api-python:1.0.0 .`
 3. Once the docker build completes, you should be able to see the nmap_api-python:1.0.0 image via `docker images`
-4. `docker network create nmap_api-net`
-5. `docker run --name=mongo --rm -d --network=nmap_api-net mongo`
-6. `docker run --name=nmap_api-python --rm -p 5000:5000 -d --network=nmap_api-net drouleaufsa/nmap_api-python:1.0.0`
+4. `docker network create nmap_api-net` - creates a bridge network, allowing communication between nmap-api container and mongo container
+5. `docker run --name=mongo --rm -d --network=nmap_api-net mongo` - run the mongo container
+6. `docker run --name=nmap_api-python --rm -p 5000:5000 -d --network=nmap_api-net nmap_api-python:1.0.0` - run the nmap_api-python container, exposing port 5000
 
 **ARM-based MAC users**:
-If you are on an ARM-based MAC you will likely some some different behavior in the nmap api service because the service was for the linux/amd64 platform not the linux/arm64/v8 platform.
-However, do not fret. There is a workaround with Docker Desktop to ensure you don't miss out on the fun! You will need to change two settings:
+If you are on an ARM-based MAC you will likely experience some different behavior in the nmap api service because the service was built for the linux/amd64 platform not the linux/arm64/v8 platform. However, do not fret! There is a workaround with Docker Desktop to ensure you don't miss out on the fun! You will need to change two settings:
 - General > Enable `Use Virtualization framework`
 - Features in development > Enable `Use Rosetta for x86/amd64 emulation on Apple Silicon`
 - Restart Docker Desktop
