@@ -89,7 +89,7 @@ spec:
         app: nmap-api
     spec:
       containers:
-      - image: nmap_api-python:1.0.0
+      - image: drouleaufsa/nmap_api-python:1.0.0
         imagePullPolicy: Always
         name: nmap-api
         ports:
