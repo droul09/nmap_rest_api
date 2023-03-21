@@ -24,14 +24,14 @@ This API service was created using Python3 + Flask to create the core funcationa
 The API service has been containerized via Docker and the MongoDB database is also being run as an open-source Docker container.
 These containers are orchestrated via a local single-node Kubernetes (v1.25.4) cluster run via Docker Desktop.
 
-#### Why Python3 + Flask for the langauge and web framework?
+#### > Why Python3 + Flask for the langauge and web framework?
 I really enjoy Python! But besides that, Flask is a lightweight web framework that is easy to use and configure, making it a popular choice for building REST APIs. Flask provides a simple and intuitive interface for defining routes and handling HTTP requests, which makes it easy to build a scalable and maintainable API service.
 
 Python3 is a powerful and versatile programming language that is widely used in development. Python3 has a large and active community of developers who create libraries and frameworks that make it easy to build complex web applications. Python3 also has a rich set of standard libraries that make it easy to perform tasks like data processing, networking, and system administration.
 
 Together, Python3 and Flask provide a powerful and flexible platform for building REST APIs. Flask's simplicity and ease of use make it easy to get started, while Python3's rich set of libraries and powerful language features make it easy to build complex and scalable applications. Additionally, Python3 and Flask have excellent documentation and community support, which can make it easier to find help and resources when building the NMAP API service.
 
-#### Why MonogDB for the datastore?
+#### > Why MonogDB for the datastore?
 MongoDB is an excellent choice for storing unstructured data like NMAP scan results. MongoDB's document-based data model is ideal for storing unstructured data because it allows for flexible and dynamic schema designs. The document model allows you to store data in a hierarchy of nested documents, arrays, and values, which makes it easy to store complex and unstructured data types.
 
 In the case of NMAP scan results, the data is generally not structured, and it can vary depending on the type of scan being performed. MongoDB allows you to store these results as documents, which can include all of the relevant information about the scan, such as the IP address, open ports, and other details. You can store this data in a single collection and retrieve it using powerful query capabilities provided by MongoDB, such as range queries, full-text search, and geospatial queries.
@@ -40,7 +40,7 @@ Additionally, MongoDB's indexing capabilities make it easy to search and retriev
 
 MongoDB also has built-in support for sharding and provides a powerful, flexible, and scalable way to distribute data across multiple nodes. MongoDB uses a sharding key to divide the data into ranges and then distributes the ranges across shards based on the key's value. MongoDB's sharding architecture is highly scalable and can support petabytes of data and thousands of nodes. Additionally, MongoDB provides automatic rebalancing of data across shards, making it easier to manage large, distributed databases. MongoDB makes sharding easier to manage, such as automatic balancing of data across shards and automatic failover of replica sets. MongoDB's sharding architecture is designed to support high levels of read and write throughput, making it an excellent choice for applications with high-volume workloads.
 
-#### Why Kubernetes for Container Orchestration?
+#### > Why Kubernetes for Container Orchestration?
 Kubernetes is a good choice for running the NMAP service. Kubernetes is a powerful and flexible container orchestration platform that makes it easy to deploy, scale, and manage containerized applications. By running the NMAP service on Kubernetes, you can take advantage of features like load balancing, auto-scaling, and rolling updates, which can help ensure that your service is always available and responsive.
 
 Kubernetes also provides a rich set of tools and features for managing containerized applications, including resource management, service discovery, and logging and monitoring. This can help make it easier to troubleshoot issues and ensure that your service is running smoothly.
