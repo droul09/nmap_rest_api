@@ -118,6 +118,21 @@ For Docker Desktop you can enable a local, single-node cluster by going into Set
   - You can then ctrl+c in the container to stop the `ncat -l 8000` command
   - Type `exit` to exit the container
 
+### Snooping around the datastore
+If you get curious and want to look into the MongoDB datastore, you can do that via:
+- `docker ps` - locate and copy the container id for the mongo container
+- `docker exec -it <container id> bash` - this will put you in an interactive shell on the container
+- Once inside the mongo container, type `mongosh`
+- `show databases` - to see the availabel databases (ours is nmap)
+- `use nmap`
+- `show collections` - to view the collections inside the nmap db, there should only be `nmap_scan_results`
+- `db.nmap_scan_results.find()` - to view all items in the collections
+- `db.nmap_scan_results.find({"host":"dns.google"})` - to view scans for a specific host, found by hostname
+- `db.nmap_scan_results.find({"ip":"127.0.0.1"})` - to view scans for a specific host, found by IP
+
+<img src="https://user-images.githubusercontent.com/126095600/226524457-ed0d0a4b-3c3b-4269-a3da-82d2dbcb34d9.png">
+
+
 
 
 
