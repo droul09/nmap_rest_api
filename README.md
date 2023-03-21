@@ -77,6 +77,7 @@ Some aspects to make this nmap api service more capable of serving 1M requests p
 - linux/amd64 OS platform
 
 For Docker Desktop you can enable a local, single-node cluster by going into Settings > Kubernetes and checking enable
+
 <img src="https://user-images.githubusercontent.com/126095600/226502450-202fb113-89c6-4cbe-9485-9ca75568bdc0.png" width="700">
 
 ### Setup
