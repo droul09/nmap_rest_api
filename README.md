@@ -33,8 +33,11 @@ The Kubernetes cluster components consists of:
 
 <img src="https://user-images.githubusercontent.com/126095600/226509984-e1dee4a3-ec9f-41cd-85af-1475b48b4178.png" width="700">
 
+### Data Flow Diagram
+<img src="https://user-images.githubusercontent.com/126095600/226513269-51dbcc05-04a3-4807-91e0-25c95189000b.png" width ="700">
 
-### System Pre-reqs
+
+## System Pre-reqs
 - python3
 - Docker w/cli, preferable via Docker Desktop
 - kubectl (kuberenetes cli)
