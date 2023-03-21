@@ -74,19 +74,34 @@ Some aspects to make this nmap api service more capable of serving 1M requests p
 - Docker w/cli, preferable via Docker Desktop
 - kubectl (kuberenetes cli)
 - kubernetes cluster (via Docker Desktop, MiniKube, etc.)
+- linux/amd64 OS platform
 
 For Docker Desktop you can enable a local, single-node cluster by going into Settings > Kubernetes and checking enable
 <img src="https://user-images.githubusercontent.com/126095600/226502450-202fb113-89c6-4cbe-9485-9ca75568bdc0.png" width="700">
 
-### Setup 
+### Setup
+Recommended: Kubernetes deployment
 1. Clone the repository locally (git clone)
-2. Navigate to the nmap_api directory
-3. Run `docker build -t nmap_api-python:1.0.0 .`
-4. Once the docker build completes, you should be able to see the nmap_api-python:1.0.0 image via `docker images`
-5. Navigate up one directory `cd ..`
-6. Run `kubectl create -f k8s/compiled.yaml`
-7. Wait a minute or two and then run `kubectl get pods`, you should see 4 pods ( 3 for nmap-api, 1 for mongodb)
-8. Validate some other resources, `kubectl get deployments` - you should see two deployments,  `kubectl get svc` - you should see mongo and nmap-api-svc, `kubectl get pv` - you should see the mongo-pv persistant volume list as bound
+2. Run `kubectl create -f k8s/compiled.yaml`
+3. Wait a minute or two and then run `kubectl get pods`, you should see 4 pods ( 3 for nmap-api, 1 for mongodb)
+4. Validate some other resources, `kubectl get deployments` - you should see two deployments,  `kubectl get svc` - you should see mongo and nmap-api-svc, `kubectl get pv` - you should see the mongo-pv persistant volume list as bound
+5. The output of `kubectl get svc`, should have localhost under the External-IP column
+
+Optional: If you would like to build the image locally
+1. Navigate to the nmap_api directory
+2. Run `docker build -t nmap_api-python:1.0.0 .`
+3. Once the docker build completes, you should be able to see the nmap_api-python:1.0.0 image via `docker images`
+4. `docker network create nmap_api-net`
+5. `docker run --name=mongo --rm -d --network=nmap_api-net mongo`
+6. `docker run --name=nmap_api-python --rm -p 5000:5000 -d --network=nmap_api-net drouleaufsa/nmap_api-python:1.0.0`
+
+**ARM-based MAC users**:
+If you are on an ARM-based MAC you will likely some some different behavior in the nmap api service because the service was for the linux/amd64 platform not the linux/arm64/v8 platform.
+However, do not fret. There is a workaround with Docker Desktop to ensure you don't miss out on the fun! You will need to change two settings:
+- General > Enable `Use Virtualization framework`
+- Features in development > Enable `Use Rosetta for x86/amd64 emulation on Apple Silicon`
+- Restart Docker Desktop
+- Reference: https://collabnix.com/warning-the-requested-images-platform-linux-amd64-does-not-match-the-detected-host-platform-linux-arm64-v8/
 
 ### Testing the Service
 - See if the service is up and running correctly on localhost port 5000 (Do it a couple times to see the LoadBalancer in action)
@@ -131,6 +146,9 @@ If you get curious and want to look into the MongoDB datastore, you can do that 
 - `db.nmap_scan_results.find({"ip":"127.0.0.1"})` - to view scans for a specific host, found by IP
 
 <img src="https://user-images.githubusercontent.com/126095600/226524457-ed0d0a4b-3c3b-4269-a3da-82d2dbcb34d9.png">
+
+
+
 
 
 
