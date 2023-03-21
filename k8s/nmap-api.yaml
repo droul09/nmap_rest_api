@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: nmap-api
-          image: drouleaufsa/nmap_api-python:1.0.0
+          image: nmap_api-python:1.0.0
           ports:
             - containerPort: 5000
           imagePullPolicy: Always
