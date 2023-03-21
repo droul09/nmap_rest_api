@@ -12,7 +12,7 @@ Author: David Rouleau
 Last Updated: March 20th, 2023
 
 Description: The purpose of this API is to enable the ability to scan, process, and store
-the output of an NMAP scan against a host(s) (hostname or IP address.)
+the output of an NMAP scan against a host(s) (hostname or IP address)
 '''
 
 logging.basicConfig(filename='app.log', level=logging.DEBUG)
@@ -84,7 +84,10 @@ def nmap_scan():
         # It is necessary to del the ['_id'] key in the response as this key/value pair gets
         # appended as a result of the MongoDB call
         # e.g. {'host': 'scanme.nmap.org', ... '_id': ObjectId('641858b025e0632bfbdd5618')}
-        del host_response['_id']
+        try:
+            del host_response['_id']
+        except KeyError as e:
+            logging.debug("No '_id' key found in the host repsonse")
         
     aggr_response['scanstats'] = data['nmap']['scanstats']
     logging.debug("Scan results: {}".format(aggr_response))
@@ -108,7 +111,12 @@ def get_scans():
         logging.error("Scans argument must be an integer")
         return jsonify({"error": "Scans argument must be an integer."}), 400
     
-    scan_results = list(db.nmap_scan_results.find({"{}".format(is_ip(host)): host}, {"_id": 0}).sort("timestamp", -1).limit(scans))
+    try:
+        scan_results = list(db.nmap_scan_results.find({"{}".format(is_ip(host)): host}, {"_id": 0}).sort("timestamp", -1).limit(scans))
+    except Exception as e:
+        logging.error("An error occurred while querying the database: {}".format(e))
+        scan_results = []
+
     if not scan_results:
         logging.error("No scans found for host: {}".format(host))
         return jsonify({"error": "No scans found for host: {}".format(host)}), 404
@@ -131,8 +139,13 @@ def get_scan_changes():
         item = "ip"
     else:
         item = "host"
-
-    scans = list(db.nmap_scan_results.find({"{}".format(is_ip(host)): host}, {"_id": 0}).sort("timestamp", -1).limit(2))
+    
+    try:
+        scans = list(db.nmap_scan_results.find({"{}".format(is_ip(host)): host}, {"_id": 0}).sort("timestamp", -1).limit(2))
+    except Exception as e:
+        logging.error("An error occurred while querying the database: {}".format(e))
+        scans = []
+    
     if len(scans) < 2:
         return jsonify(error="Not enough scans for host"), 404
 
