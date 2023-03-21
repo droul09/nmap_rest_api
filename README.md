@@ -19,10 +19,20 @@ are done in parallel
 - All responses should be returned as JSON
 - Port scan history must be stored and displayed via a backend datastore of your choice
 
-## Setup and Pre-reqs
+## Architecture
 This API service was created using Python3 + Flask to create the core funcationality and is supported by a MongoDB database backend (NoSQL).
 The API service has been containerized via Docker and the MongoDB database is also being run as an open-source Docker container.
 These containers are orchestrated via a local single-node Kubernetes (v1.25.4) cluster run via Docker Desktop.
+
+The Kubernetes cluster components consists of:
+- nmap-api-svc - external load balancer to the nmap-api pods, handles and distributes incoming requests to nmap-api pods
+- nmap-api (deployment) - handles the deployment of the nmap-api service, to include replicas and container images
+- mongo-svc - internal load balancer to distribute traffic from nmap-api pods to the backend MongoDB database
+- monogo (deployment) - handles the deployment of the MongoDB database
+- monogo-volume - the persistant volume that stores the MongoDB data
+
+<img src="https://user-images.githubusercontent.com/126095600/226509984-e1dee4a3-ec9f-41cd-85af-1475b48b4178.png" width="700">
+
 
 ### System Pre-reqs
 - python3
@@ -38,6 +48,9 @@ For Docker Desktop you can enable a local, single-node cluster by going into Set
 2. Navigate to the nmap_api directory
 3. Run `docker build -t nmap_api-python:1.0.0 .`
 4. 
+
+
+
 
 
 
