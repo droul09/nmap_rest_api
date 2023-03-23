@@ -84,8 +84,9 @@ For Docker Desktop you can enable a local, single-node cluster by going into Set
 <img src="https://user-images.githubusercontent.com/126095600/226502450-202fb113-89c6-4cbe-9485-9ca75568bdc0.png" width="700">
 
 ### Setup
-Recommended: Kubernetes deployment
+**Recommended: Kubernetes deployment**
 1. Clone the repository locally (git clone)
+2. Run `kubectl config use-context docker-desktop`
 2. Run `kubectl create -f k8s/compiled.yaml`
 3. Wait a minute or two and then run `kubectl get pods`, you should see 4 pods ( 3 for nmap-api, 1 for mongodb)
 4. Validate some other resources, `kubectl get deployments` - you should see two deployments,  `kubectl get svc` - you should see mongo and nmap-api-svc, `kubectl get pv` - you should see the mongo-pv persistant volume list as bound
