@@ -63,11 +63,14 @@ The Kubernetes cluster components consists of:
 There are many factors at play when operating at large scale and building a service that can handle that scale, most often it revolves around aspects of horizontal scaling, fault tolerance / auto-healing, distributed architecture, database scaling (sharding or clustering), caching, etc.
 
 Some aspects to make this nmap api service more capable of serving 1M requests per second:
-- Load balancing: To handle such a massive load of requests, the service would need to employ a load balancer that distributes the incoming requests across multiple instances of the NMAP Rest API service running in parallel. While the current architecture does this, it can be enhanced using Kubernetes Horizontal Pod Autoscaling (HPA), which automatically scales the number of pods based on CPU utilization or other metrics.
+- Load balancing: To handle such a massive load of requests, the service would need to employ a load balancer that distributes the incoming requests across multiple instances of the NMAP Rest API service running in parallel. While the current architecture does this, it can be enhanced using Kubernetes Horizontal Pod Autoscaling (HPA) and cluster Auto-Scaler, which automatically scales the number of pods or cluster nodes based on CPU utilization or other metrics enabling quick horizontal service scalability to handle a massive load of requests.
 - Caching: To reduce the response time of the API service, caching can be implemented at various levels such as client-side, CDN, and server-side caching. This reduces the time taken to generate a response and reduces the load on the backend MongoDB database. Using a distributed caching solution, such as Redis or Memcached, would enable you to cache responses across multiple servers and scale horizontally as needed.
 - Database optimization: As the MongoDB database is used as the backend datastore, it needs to be optimized to handle a massive load of requests. One way to optimize it is by employing sharding, which partitions the data across multiple servers. This enables the database to handle more requests in parallel. Another aspect to think about is creating indexes on frequently accessed fields, ensuring that the database is appropriately tuned for the workload it will be handling.
 - Asynchronous processing: To improve the performance of the API service, it's better to perform scans asynchronously using tools like Celery, Kafka, or RabbitMQ. This would allow multiple scans to run concurrently without blocking other requests.
-- Autoscaling groups: Autoscaling groups in Kubernetes can automatically scale the number of replicas of a pod based on CPU utilization or other metrics. Using autoscaling groups would enable you to scale the service horizontally to handle a massive load of requests.
+
+### Current Service Limitations
+- Security: no MongoDB auth, no API auth (bearer token, etc.), RBAC enabled at the cluster level, API rate limiting (DDoS prevention), implement HTTPS (SSL/TLS) for secure, in-transit communication
+- Monitoring/Logging: - no centralized logging aggregation and visulaization aspect (ideally use something like Prometheus/Grafana), increased logging for detailed API activity, MongoDB database level logging, KPI's or performance metrics around the API and DB
 
 ## System Pre-reqs
 - python3
